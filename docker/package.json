@@ -2,8 +2,7 @@
   "name": "docker",
   "scripts": {
     "dev": "bun run --hot src/index.ts",
-    "build": "bun build src/index.ts --compile --outfile dist/index",
-    "start": "./dist/index"
+    "start": "bun run src/index.ts"
   },
   "dependencies": {
     "hono": "^4.12.2"
