@@ -1,6 +1,7 @@
 class OptimizedJobScheduler {
   #jobs_map = new Map(); // id -> job
   #is_running = false;
+  #running_job_id = null;
   #unique_time_stamp = new Set();
   constructor() {}
 
@@ -27,6 +28,8 @@ class OptimizedJobScheduler {
   startJob() {
     if (this.#is_running) return;
     const jobId = this.#computeTopJob();
+    if (jobId === null) return;
+
     const job = this.#jobs_map.get(jobId);
 
     this.#jobs_map.set(jobId, {
@@ -35,6 +38,7 @@ class OptimizedJobScheduler {
     });
 
     this.#is_running = true;
+    this.#running_job_id = jobId;
     return;
   }
 
@@ -42,15 +46,12 @@ class OptimizedJobScheduler {
   // - Completes and removes the currently running job from the scheduler.
   // - If no running job exists, ignore or return error.
   completeJob() {
-    if (!this.#is_running) return;
-    const jobId = this.#computeTopJob();
+    if (!this.#is_running || this.#running_job_id === null) return;
+    const jobId = this.#running_job_id;
     const job = this.#jobs_map.get(jobId);
-    this.#jobs_map.set(jobId, {
-      ...job,
-      status: "completed",
-    });
 
     this.#is_running = false;
+    this.#running_job_id = null;
     this.#jobs_map.delete(jobId);
     this.#unique_time_stamp.delete(job.timestamp);
     return;
@@ -67,27 +68,29 @@ class OptimizedJobScheduler {
 
     if (job.status == "running") {
       this.#is_running = false;
+      this.#running_job_id = null;
     }
 
+    this.#unique_time_stamp.delete(job.timestamp);
     this.#jobs_map.delete(id);
   }
 
   // compute the highest priority job
 
   #computeTopJob() {
-    // case 1, find pending job with highest priority
-
-    const allJobs = Array.from(this.#jobs_map.entries);
-    const jobId = allJobs
-      .filter(([id, job]) => job.status == "pending")
+    const allJobs = Array.from(this.#jobs_map.values());
+    const job = allJobs
+      .filter((job) => job.status == "pending")
       .reduce((best, job) => {
         if (!best) return job;
         if (job.priority > best.priority) return job;
         if (job.priority === best.priority && job.timestamp < best.timestamp)
           return job;
         return best;
-      }, null)?.id;
+      }, null);
 
-    return jobId;
+    return job ? job.id : null;
   }
 }
+
+module.exports = OptimizedJobScheduler;
