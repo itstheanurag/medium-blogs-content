@@ -1,6 +1,6 @@
 // job status - pending, completed and running
 
-class JobSchedular {
+class JobScheduler {
   #jobs = [];
   #isRunning = false;
   #runningJobIndex = -1;
