@@ -14,18 +14,6 @@ class Row {
     this.data = { ...data };
   }
 
-  get(column: string) {
-    return this.data[column];
-  }
-
-  set(column: string, value: ColumnSchema) {
-    if (!(column in this.data)) {
-      throw new Error(`Column "${column}" does not exist`);
-    }
-
-    this.data[column] = value;
-  }
-
   update(partial: Partial<RowData>) {
     for (const key in partial) {
       if (!(key in this.data)) {
@@ -34,13 +22,11 @@ class Row {
 
       this.data[key] = partial[key];
     }
+
+    return this.data;
   }
 
   toJSON() {
     return { ...this.data };
-  }
-
-  clone() {
-    return new Row(this.data);
   }
 }
